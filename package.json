@@ -1,9 +1,13 @@
 {
   "name": "rally-command-root",
   "version": "1.0.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
-    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
-    "build": "cd client && npm install && npm run build",
-    "start": "cd server && npm start"
+    "install-all": "npm install",
+    "build": "npm install && npm run build --workspace=client",
+    "start": "npm start --workspace=server"
   }
 }
