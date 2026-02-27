@@ -63,7 +63,7 @@ const TimerDisplay: React.FC = () => {
   const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
-    axios.get('http://localhost:3001/api/rallies')
+    axios.get('/api/rallies')
       .then(response => {
         setRallyData(response.data);
         if (response.data.timerState) setTimerState(response.data.timerState);
