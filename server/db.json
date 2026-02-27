@@ -35,7 +35,7 @@
     "counterCounterOffset": 10
   },
   "timerState": {
-    "startTime": 1772213728764,
-    "status": "counting"
+    "startTime": null,
+    "status": "idle"
   }
 }
