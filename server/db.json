@@ -1,0 +1,41 @@
+{
+  "mainRallies": [
+    {
+      "id": "1771973109957",
+      "name": "mos",
+      "marchTime": 8
+    },
+    {
+      "id": "1771973121856",
+      "name": "mimi",
+      "marchTime": 15
+    }
+  ],
+  "counterRallies": [
+    {
+      "id": "1771973133942",
+      "name": "deniz",
+      "marchTime": 11
+    },
+    {
+      "id": "1771973143971",
+      "name": "jabber",
+      "marchTime": 10
+    }
+  ],
+  "counterCounterRallies": [
+    {
+      "id": "1771973164639",
+      "name": "p1",
+      "marchTime": 10
+    }
+  ],
+  "settings": {
+    "counterOffset": 10,
+    "counterCounterOffset": 10
+  },
+  "timerState": {
+    "startTime": 1772213728764,
+    "status": "counting"
+  }
+}
