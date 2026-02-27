@@ -8,15 +8,12 @@ import {
   Box,
   Paper,
   Grid,
-  Alert,
   Chip,
   LinearProgress,
   Card,
   CardContent,
 } from '@mui/material';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const socket = io();
 const START_DELAY = 10;
@@ -87,8 +84,18 @@ const TimerDisplay: React.FC = () => {
     };
   }, []);
 
+  const calculateTimeline = (data: RallyData) => {
+    const maxMain = data.mainRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
+    const counterStart = maxMain + data.settings.counterOffset;
+    const maxCounter = data.counterRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
+    const counterHit = counterStart + maxCounter;
+    const counterCounterStart = counterHit + data.settings.counterCounterOffset;
+    const maxCounterCounter = data.counterCounterRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
+    return { maxMain, counterStart, maxCounter, counterHit, counterCounterStart, maxCounterCounter, operationTotalTime: counterCounterStart + maxCounterCounter };
+  };
+
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    let interval: ReturnType<typeof setInterval> | null = null;
     if (timerState.status === 'counting' && timerState.startTime) {
       interval = setInterval(() => {
         const now = Date.now();
@@ -107,16 +114,6 @@ const TimerDisplay: React.FC = () => {
     return () => { if (interval) clearInterval(interval); };
   }, [timerState, rallyData]);
 
-  const calculateTimeline = (data: RallyData) => {
-    const maxMain = data.mainRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
-    const counterStart = maxMain + data.settings.counterOffset;
-    const maxCounter = data.counterRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
-    const counterHit = counterStart + maxCounter;
-    const counterCounterStart = counterHit + data.settings.counterCounterOffset;
-    const maxCounterCounter = data.counterCounterRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
-    return { maxMain, counterStart, maxCounter, counterHit, counterCounterStart, maxCounterCounter, operationTotalTime: counterCounterStart + maxCounterCounter };
-  };
-
   const timeline = useMemo(() => calculateTimeline(rallyData), [rallyData]);
 
   const getStatusConfig = (leader: RallyLeader, groupStart: number, groupMax: number) => {
@@ -133,8 +130,8 @@ const TimerDisplay: React.FC = () => {
     return { label: 'HIT TARGET', color: '#388e3c', launch: 0, hit: 0, active: false };
   };
 
-  const renderRallySection = (type: keyof RallyData, title: string, groupStart: number, groupMax: number) => (
-    <Grid item xs={12} md={4}>
+  const renderRallySection = (type: 'mainRallies' | 'counterRallies' | 'counterCounterRallies', title: string, groupStart: number, groupMax: number) => (
+    <Grid size={{ xs: 12, md: 4 }}>
       <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: 800, color: '#1a237e', mb: 2 }}>
         {title}
       </Typography>
@@ -174,13 +171,13 @@ const TimerDisplay: React.FC = () => {
                   </Box>
                   
                   <Grid container spacing={2}>
-                    <Grid item xs={6}>
+                    <Grid size={6}>
                       <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, display: 'block', mb: 0.5 }}>LAUNCH IN</Typography>
                       <Typography variant="h4" sx={{ fontWeight: 900, color: status.label === 'LAUNCH NOW' ? '#d32f2f' : '#222' }}>
                         {formatTime(status.launch)}
                       </Typography>
                     </Grid>
-                    <Grid item xs={6} sx={{ borderLeft: '1px solid #eee' }}>
+                    <Grid size={6} sx={{ borderLeft: '1px solid #eee' }}>
                       <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, display: 'block', mb: 0.5 }}>HIT IN</Typography>
                       <Typography variant="h4" sx={{ fontWeight: 900, color: '#444' }}>
                         {formatTime(status.hit)}

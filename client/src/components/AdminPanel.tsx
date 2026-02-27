@@ -13,7 +13,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
   IconButton,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -136,7 +135,7 @@ const AdminPanel: React.FC = () => {
   };
 
   const renderRallySection = (type: RallyType, title: string) => (
-    <Grid item xs={12} md={4} key={type}>
+    <Grid size={{ xs: 12, md: 4 }} key={type}>
       <Paper elevation={3} sx={{ p: 2 }}>
         <Typography variant="h6" component="h2" gutterBottom>{title}</Typography>
         <List>
@@ -186,7 +185,7 @@ const AdminPanel: React.FC = () => {
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
         <Typography variant="h5" component="h2" gutterBottom>Settings</Typography>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               fullWidth
               label="Counter Rally Offset (seconds)"
@@ -197,7 +196,7 @@ const AdminPanel: React.FC = () => {
               variant="outlined"
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               fullWidth
               label="Counter-Counter Rally Offset (seconds)"
@@ -208,7 +207,7 @@ const AdminPanel: React.FC = () => {
               variant="outlined"
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Button variant="contained" color="primary" onClick={saveRallyData}>
               Save All Changes
             </Button>
