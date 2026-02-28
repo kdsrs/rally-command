@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { useTranslation } from 'react-i18next';
 import {
   Container,
   Typography,
@@ -12,8 +13,12 @@ import {
   LinearProgress,
   Card,
   CardContent,
+  MenuItem,
+  Select,
+  FormControl,
 } from '@mui/material';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import LanguageIcon from '@mui/icons-material/Language';
 
 const socket = io();
 const START_DELAY = 10;
@@ -47,6 +52,7 @@ const formatTime = (seconds: number): string => {
 };
 
 const TimerDisplay: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const [rallyData, setRallyData] = useState<RallyData>({
     mainRallies: [],
     counterRallies: [],
@@ -122,23 +128,23 @@ const TimerDisplay: React.FC = () => {
     const timeUntilLaunch = absoluteLaunchTime - elapsed;
     const timeUntilHit = (START_DELAY + groupStart + groupMax) - elapsed;
 
-    if (timerState.status === 'idle') return { label: 'STANDBY', color: '#757575', launch: absoluteLaunchTime, hit: leader.marchTime, active: false };
-    if (timeUntilLaunch > 10) return { label: 'WAITING', color: '#9e9e9e', launch: timeUntilLaunch, hit: timeUntilHit, active: false };
-    if (timeUntilLaunch > 0) return { label: 'GET READY', color: '#ffa000', launch: timeUntilLaunch, hit: timeUntilHit, active: true, pulse: true };
-    if (timeUntilLaunch > -2) return { label: 'LAUNCH NOW', color: '#d32f2f', launch: 0, hit: timeUntilHit, active: true, shake: true };
-    if (timeUntilHit > 0) return { label: 'IN TRANSIT', color: '#1976d2', launch: 0, hit: timeUntilHit, active: true };
-    return { label: 'HIT TARGET', color: '#388e3c', launch: 0, hit: 0, active: false };
+    if (timerState.status === 'idle') return { label: t('STANDBY'), color: '#757575', launch: absoluteLaunchTime, hit: leader.marchTime, active: false };
+    if (timeUntilLaunch > 10) return { label: t('WAITING'), color: '#9e9e9e', launch: timeUntilLaunch, hit: timeUntilHit, active: false };
+    if (timeUntilLaunch > 0) return { label: t('GET READY'), color: '#ffa000', launch: timeUntilLaunch, hit: timeUntilHit, active: true, pulse: true };
+    if (timeUntilLaunch > -2) return { label: t('LAUNCH NOW'), color: '#d32f2f', launch: 0, hit: timeUntilHit, active: true, shake: true };
+    if (timeUntilHit > 0) return { label: t('IN TRANSIT'), color: '#1976d2', launch: 0, hit: timeUntilHit, active: true };
+    return { label: t('HIT TARGET'), color: '#388e3c', launch: 0, hit: 0, active: false };
   };
 
   const renderRallySection = (type: 'mainRallies' | 'counterRallies' | 'counterCounterRallies', title: string, groupStart: number, groupMax: number) => (
     <Grid size={{ xs: 12, md: 4 }}>
       <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: 800, color: '#1a237e', mb: 2 }}>
-        {title}
+        {t(title)}
       </Typography>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {rallyData[type].length === 0 ? (
           <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
-            <Typography variant="body2" color="textSecondary">No leaders assigned</Typography>
+            <Typography variant="body2" color="textSecondary">{t('No leaders assigned')}</Typography>
           </Paper>
         ) : (
           rallyData[type].map(leader => {
@@ -149,8 +155,8 @@ const TimerDisplay: React.FC = () => {
                 elevation={status.active ? 8 : 1}
                 sx={{ 
                   borderLeft: `8px solid ${status.color}`,
-                  bgcolor: status.label === 'LAUNCH NOW' ? '#fff4f4' : 'white',
-                  transform: status.label === 'LAUNCH NOW' ? 'scale(1.02)' : 'none',
+                  bgcolor: status.label === t('LAUNCH NOW') ? '#fff4f4' : 'white',
+                  transform: status.label === t('LAUNCH NOW') ? 'scale(1.02)' : 'none',
                   transition: 'all 0.2s ease-in-out'
                 }}
               >
@@ -172,13 +178,13 @@ const TimerDisplay: React.FC = () => {
                   
                   <Grid container spacing={2}>
                     <Grid size={6}>
-                      <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, display: 'block', mb: 0.5 }}>LAUNCH IN</Typography>
-                      <Typography variant="h4" sx={{ fontWeight: 900, color: status.label === 'LAUNCH NOW' ? '#d32f2f' : '#222' }}>
+                      <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, display: 'block', mb: 0.5 }}>{t('LAUNCH IN')}</Typography>
+                      <Typography variant="h4" sx={{ fontWeight: 900, color: status.label === t('LAUNCH NOW') ? '#d32f2f' : '#222' }}>
                         {formatTime(status.launch)}
                       </Typography>
                     </Grid>
                     <Grid size={6} sx={{ borderLeft: '1px solid #eee' }}>
-                      <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, display: 'block', mb: 0.5 }}>HIT IN</Typography>
+                      <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, display: 'block', mb: 0.5 }}>{t('HIT IN')}</Typography>
                       <Typography variant="h4" sx={{ fontWeight: 900, color: '#444' }}>
                         {formatTime(status.hit)}
                       </Typography>
@@ -193,6 +199,10 @@ const TimerDisplay: React.FC = () => {
     </Grid>
   );
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, pb: 8 }}>
       <style>{`
@@ -203,19 +213,37 @@ const TimerDisplay: React.FC = () => {
         }
       `}</style>
 
+      {/* Language Switcher */}
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, alignItems: 'center', gap: 1 }}>
+        <LanguageIcon color="action" />
+        <FormControl variant="standard" size="small" sx={{ minWidth: 120 }}>
+          <Select
+            value={i18n.language.split('-')[0]}
+            onChange={(e) => changeLanguage(e.target.value)}
+            displayEmpty
+          >
+            <MenuItem value="en">English</MenuItem>
+            <MenuItem value="fr">Français</MenuItem>
+            <MenuItem value="tr">Türkçe</MenuItem>
+            <MenuItem value="de">Deutsch</MenuItem>
+            <MenuItem value="sv">Svenska</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
       {/* Hero Header & Warmup */}
       <Paper elevation={0} sx={{ p: 4, mb: 4, borderRadius: 4, bgcolor: '#1a237e', color: 'white', textAlign: 'center' }}>
-        <Typography variant="h2" sx={{ fontWeight: 900, mb: 1, letterSpacing: -1 }}>RALLY COMMAND</Typography>
+        <Typography variant="h2" sx={{ fontWeight: 900, mb: 1, letterSpacing: -1 }}>{t('RALLY COMMAND')}</Typography>
         
         {timerState.status === 'counting' && elapsed < START_DELAY ? (
           <Box sx={{ mt: 3, p: 3, bgcolor: 'rgba(255,255,255,0.1)', borderRadius: 2, border: '2px dashed rgba(255,255,255,0.3)' }}>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: '#4fc3f7' }}>SYSTEM WARMUP IN PROGRESS</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: '#4fc3f7' }}>{t('SYSTEM WARMUP IN PROGRESS')}</Typography>
             <Typography variant="h1" sx={{ fontWeight: 950, color: '#fff' }}>{Math.ceil(START_DELAY - elapsed)}</Typography>
-            <Typography variant="subtitle1">GET READY TO LAUNCH THE FIRST MARCH</Typography>
+            <Typography variant="subtitle1">{t('GET READY TO LAUNCH THE FIRST MARCH')}</Typography>
           </Box>
         ) : (
           <Typography variant="h6" sx={{ opacity: 0.7, fontWeight: 500 }}>
-            {timerState.status === 'idle' ? 'READY TO COORDINATE' : timerState.status === 'finished' ? 'OPERATION COMPLETE' : 'OPERATION LIVE'}
+            {timerState.status === 'idle' ? t('READY TO COORDINATE') : timerState.status === 'finished' ? t('OPERATION COMPLETE') : t('OPERATION LIVE')}
           </Typography>
         )}
 
@@ -229,7 +257,7 @@ const TimerDisplay: React.FC = () => {
             startIcon={<RocketLaunchIcon />}
             sx={{ px: 4, py: 1.5, borderRadius: 2, fontWeight: 900, fontSize: '1.1rem' }}
           >
-            INITIATE OPERATION
+            {t('INITIATE OPERATION')}
           </Button>
           <Button
             variant="outlined"
@@ -238,7 +266,7 @@ const TimerDisplay: React.FC = () => {
             disabled={timerState.status === 'idle'}
             sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.3)', px: 4, borderRadius: 2, fontWeight: 700 }}
           >
-            ABORT
+            {t('ABORT')}
           </Button>
         </Box>
       </Paper>
@@ -247,7 +275,7 @@ const TimerDisplay: React.FC = () => {
       {timerState.status === 'counting' && (
         <Box sx={{ mb: 6 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1a237e' }}>TOTAL MISSION PROGRESS</Typography>
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1a237e' }}>{t('TOTAL MISSION PROGRESS')}</Typography>
             <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1a237e' }}>{Math.round((elapsed / (timeline.operationTotalTime + START_DELAY)) * 100)}%</Typography>
           </Box>
           <LinearProgress 

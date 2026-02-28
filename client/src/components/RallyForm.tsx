@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, TextField, Button, Typography, Paper } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 interface RallyLeader {
   id: string;
   name: string;
-  marchTime: number; // in seconds
+  marchTime: number;
 }
 
 interface RallyFormProps {
@@ -14,47 +15,48 @@ interface RallyFormProps {
 }
 
 const RallyForm: React.FC<RallyFormProps> = ({ initialData, onSave, onCancel }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState(initialData?.name || '');
-  const [marchTime, setMarchTime] = useState(initialData?.marchTime || 0);
-
-  useEffect(() => {
-    setName(initialData?.name || '');
-    setMarchTime(initialData?.marchTime || 0);
-  }, [initialData]);
+  const [marchTime, setMarchTime] = useState(initialData?.marchTime?.toString() || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      id: initialData?.id || Date.now().toString(), // Generate new ID if not editing
+      id: initialData?.id || Math.random().toString(36).substr(2, 9),
       name,
-      marchTime,
+      marchTime: parseInt(marchTime) || 0,
     });
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <TextField
-        label="Name"
-        variant="outlined"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-        fullWidth
-      />
-      <TextField
-        label="March Time (seconds)"
-        variant="outlined"
-        type="number"
-        value={marchTime}
-        onChange={(e) => setMarchTime(parseInt(e.target.value) || 0)}
-        required
-        fullWidth
-      />
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-        <Button variant="contained" color="primary" type="submit">Save</Button>
-        <Button variant="outlined" color="secondary" onClick={onCancel}>Cancel</Button>
+    <Paper sx={{ p: 2, mt: 2, bgcolor: '#f9f9f9' }}>
+      <Typography variant="subtitle1" gutterBottom>
+        {initialData ? t('Edit Leader') : t('Add New Leader')}
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <TextField
+          label={t('Leader Name')}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          fullWidth
+        />
+        <TextField
+          label={t('March Time (seconds)')}
+          type="number"
+          value={marchTime}
+          onChange={(e) => setMarchTime(e.target.value)}
+          required
+          fullWidth
+        />
+        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+          <Button onClick={onCancel}>{t('Cancel')}</Button>
+          <Button type="submit" variant="contained" color="primary">
+            {t('Save')}
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </Paper>
   );
 };
 

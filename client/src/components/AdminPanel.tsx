@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { useTranslation } from 'react-i18next';
 import RallyForm from './RallyForm';
 import {
   Container,
@@ -40,6 +41,7 @@ interface RallyData {
 type RallyType = 'mainRallies' | 'counterRallies' | 'counterCounterRallies';
 
 const AdminPanel: React.FC = () => {
+  const { t } = useTranslation();
   const [rallyData, setRallyData] = useState<RallyData>({
     mainRallies: [],
     counterRallies: [],
@@ -137,7 +139,7 @@ const AdminPanel: React.FC = () => {
   const renderRallySection = (type: RallyType, title: string) => (
     <Grid size={{ xs: 12, md: 4 }} key={type}>
       <Paper elevation={3} sx={{ p: 2 }}>
-        <Typography variant="h6" component="h2" gutterBottom>{title}</Typography>
+        <Typography variant="h6" component="h2" gutterBottom>{t(title)}</Typography>
         <List>
           {rallyData[type].map(leader => (
             <ListItem
@@ -163,7 +165,7 @@ const AdminPanel: React.FC = () => {
           onClick={() => handleAddLeader(type)}
           sx={{ mt: 2 }}
         >
-          Add {title.replace(' Rallies', '')} Leader
+          {t('Add Leader', { type: t(title).replace(' Rallies', '').replace('Attaques ', '').replace('Saldırılar', '').replace('angriffe', '').replace('attacker', '') })}
         </Button>
         {showFormForType === type && (
           <RallyForm
@@ -178,17 +180,17 @@ const AdminPanel: React.FC = () => {
 
   return (
     <Container maxWidth="lg">
-      <Typography variant="h4" component="h1" gutterBottom align="center">
-        Admin Panel
+      <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ mt: 4 }}>
+        {t('Admin Panel')}
       </Typography>
 
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h5" component="h2" gutterBottom>Settings</Typography>
+        <Typography variant="h5" component="h2" gutterBottom>{t('Settings')}</Typography>
         <Grid container spacing={2} alignItems="center">
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               fullWidth
-              label="Counter Rally Offset (seconds)"
+              label={t('Counter Rally Offset (seconds)')}
               type="number"
               name="counterOffset"
               value={rallyData.settings.counterOffset}
@@ -199,7 +201,7 @@ const AdminPanel: React.FC = () => {
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextField
               fullWidth
-              label="Counter-Counter Rally Offset (seconds)"
+              label={t('Counter-Counter Rally Offset (seconds)')}
               type="number"
               name="counterCounterOffset"
               value={rallyData.settings.counterCounterOffset}
@@ -209,7 +211,7 @@ const AdminPanel: React.FC = () => {
           </Grid>
           <Grid size={12}>
             <Button variant="contained" color="primary" onClick={saveRallyData}>
-              Save All Changes
+              {t('Save All Changes')}
             </Button>
           </Grid>
         </Grid>
@@ -222,7 +224,7 @@ const AdminPanel: React.FC = () => {
       </Grid>
 
       <Box sx={{ mt: 4, p: 2, bgcolor: 'background.paper' }}>
-        <Typography variant="h6">Debug Data:</Typography>
+        <Typography variant="h6">{t('Debug Data')}:</Typography>
         <pre>{JSON.stringify(rallyData, null, 2)}</pre>
       </Box>
     </Container>
