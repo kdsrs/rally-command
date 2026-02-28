@@ -29,14 +29,22 @@ const db = low(adapter);
 db.defaults({
   mainRallies: [],
   counterRallies: [],
+  ghostRallies: [],
   counterCounterRallies: [],
+  secondGhostRallies: [],
   settings: {
     counterOffset: 0,
-    counterCounterOffset: 0
+    ghostOffset: 0,
+    counterCounterOffset: 0,
+    secondGhostOffset: 0
   },
   timerState: {
     startTime: null,
     status: 'idle'
+  },
+  wikiContent: {
+    title: "Rally Coordination",
+    content: "The Rally Command tool helps you synchronize multiple attacks to hit a target simultaneously."
   }
 }).write();
 
@@ -54,8 +62,21 @@ app.post('/api/rallies', (req, res) => {
   res.status(200).send({ message: 'Rallies updated successfully' });
 });
 
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
+// Wiki API
+app.get('/api/wiki', (req, res) => {
+  res.json(db.get('wikiContent').value());
+});
+
+app.post('/api/wiki', (req, res) => {
+  const { code, content } = req.body;
+  if (code !== '262-12345') {
+    return res.status(403).send({ message: 'Unauthorized' });
+  }
+  db.set('wikiContent', content).write();
+  res.status(200).send({ message: 'Wiki updated successfully' });
+});
+
+// The "catchall" handler
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });

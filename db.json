@@ -1,0 +1,27 @@
+{
+  "mainRallies": [
+    {
+      "id": "raws47n7y",
+      "name": "mos",
+      "marchTime": 32
+    }
+  ],
+  "counterRallies": [],
+  "ghostRallies": [],
+  "counterCounterRallies": [],
+  "secondGhostRallies": [],
+  "settings": {
+    "counterOffset": 0,
+    "ghostOffset": 0,
+    "counterCounterOffset": 0,
+    "secondGhostOffset": 0
+  },
+  "timerState": {
+    "startTime": null,
+    "status": "idle"
+  },
+  "wikiContent": {
+    "title": "Rally Coordination",
+    "content": "The Rally Command tool helps you synchronize multiple attacks to hit a target simultaneously."
+  }
+}

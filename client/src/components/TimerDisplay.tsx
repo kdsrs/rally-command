@@ -32,10 +32,14 @@ interface RallyLeader {
 interface RallyData {
   mainRallies: RallyLeader[];
   counterRallies: RallyLeader[];
+  ghostRallies: RallyLeader[];
   counterCounterRallies: RallyLeader[];
+  secondGhostRallies: RallyLeader[];
   settings: {
     counterOffset: number;
+    ghostOffset: number;
     counterCounterOffset: number;
+    secondGhostOffset: number;
   };
 }
 
@@ -56,10 +60,14 @@ const TimerDisplay: React.FC = () => {
   const [rallyData, setRallyData] = useState<RallyData>({
     mainRallies: [],
     counterRallies: [],
+    ghostRallies: [],
     counterCounterRallies: [],
+    secondGhostRallies: [],
     settings: {
       counterOffset: 0,
+      ghostOffset: 0,
       counterCounterOffset: 0,
+      secondGhostOffset: 0,
     },
   });
   const [timerState, setTimerState] = useState<TimerState>({
@@ -92,12 +100,30 @@ const TimerDisplay: React.FC = () => {
 
   const calculateTimeline = (data: RallyData) => {
     const maxMain = data.mainRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
+    
     const counterStart = maxMain + data.settings.counterOffset;
     const maxCounter = data.counterRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
     const counterHit = counterStart + maxCounter;
-    const counterCounterStart = counterHit + data.settings.counterCounterOffset;
+
+    const ghostStart = counterHit + data.settings.ghostOffset;
+    const maxGhost = data.ghostRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
+    const ghostHit = ghostStart + maxGhost;
+
+    const counterCounterStart = ghostHit + data.settings.counterCounterOffset;
     const maxCounterCounter = data.counterCounterRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
-    return { maxMain, counterStart, maxCounter, counterHit, counterCounterStart, maxCounterCounter, operationTotalTime: counterCounterStart + maxCounterCounter };
+    const counterCounterHit = counterCounterStart + maxCounterCounter;
+
+    const secondGhostStart = counterCounterHit + data.settings.secondGhostOffset;
+    const maxSecondGhost = data.secondGhostRallies.reduce((max, l) => Math.max(max, l.marchTime), 0);
+    
+    return { 
+      maxMain, 
+      counterStart, maxCounter, 
+      ghostStart, maxGhost,
+      counterCounterStart, maxCounterCounter, 
+      secondGhostStart, maxSecondGhost,
+      operationTotalTime: secondGhostStart + maxSecondGhost 
+    };
   };
 
   useEffect(() => {
@@ -136,68 +162,73 @@ const TimerDisplay: React.FC = () => {
     return { label: t('HIT TARGET'), color: '#388e3c', launch: 0, hit: 0, active: false };
   };
 
-  const renderRallySection = (type: 'mainRallies' | 'counterRallies' | 'counterCounterRallies', title: string, groupStart: number, groupMax: number) => (
-    <Grid size={{ xs: 12, md: 4 }}>
-      <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: 800, color: '#1a237e', mb: 2 }}>
-        {t(title)}
-      </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {rallyData[type].length === 0 ? (
-          <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
-            <Typography variant="body2" color="textSecondary">{t('No leaders assigned')}</Typography>
-          </Paper>
-        ) : (
-          rallyData[type].map(leader => {
-            const status = getStatusConfig(leader, groupStart, groupMax);
-            return (
-              <Card 
-                key={leader.id} 
-                elevation={status.active ? 8 : 1}
-                sx={{ 
-                  borderLeft: `8px solid ${status.color}`,
-                  bgcolor: status.label === t('LAUNCH NOW') ? '#fff4f4' : 'white',
-                  transform: status.label === t('LAUNCH NOW') ? 'scale(1.02)' : 'none',
-                  transition: 'all 0.2s ease-in-out'
-                }}
-              >
-                <CardContent sx={{ p: '16px !important' }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>{leader.name}</Typography>
-                    <Chip 
-                      label={status.label} 
-                      sx={{ 
-                        bgcolor: status.color, 
-                        color: 'white', 
-                        fontWeight: 900,
-                        fontSize: '0.7rem',
-                        height: 24,
-                        animation: status.pulse ? 'pulse 1s infinite' : 'none'
-                      }} 
-                    />
-                  </Box>
-                  
-                  <Grid container spacing={2}>
-                    <Grid size={6}>
-                      <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, display: 'block', mb: 0.5 }}>{t('LAUNCH IN')}</Typography>
-                      <Typography variant="h4" sx={{ fontWeight: 900, color: status.label === t('LAUNCH NOW') ? '#d32f2f' : '#222' }}>
-                        {formatTime(status.launch)}
-                      </Typography>
+  const renderRallySection = (type: keyof RallyData, title: string, groupStart: number, groupMax: number) => {
+    const list = rallyData[type] as RallyLeader[];
+    if (!list) return null;
+
+    return (
+      <Grid size={{ xs: 12, md: 4 }}>
+        <Typography variant="h5" align="center" gutterBottom sx={{ fontWeight: 800, color: '#1a237e', mb: 2 }}>
+          {t(title)}
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {list.length === 0 ? (
+            <Paper variant="outlined" sx={{ p: 2, textAlign: 'center', bgcolor: '#f5f5f5' }}>
+              <Typography variant="body2" color="textSecondary">{t('No leaders assigned')}</Typography>
+            </Paper>
+          ) : (
+            list.map(leader => {
+              const status = getStatusConfig(leader, groupStart, groupMax);
+              return (
+                <Card 
+                  key={leader.id} 
+                  elevation={status.active ? 8 : 1}
+                  sx={{ 
+                    borderLeft: `8px solid ${status.color}`,
+                    bgcolor: status.label === t('LAUNCH NOW') ? '#fff4f4' : 'white',
+                    transform: status.label === t('LAUNCH NOW') ? 'scale(1.02)' : 'none',
+                    transition: 'all 0.2s ease-in-out'
+                  }}
+                >
+                  <CardContent sx={{ p: '16px !important' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 700 }}>{leader.name}</Typography>
+                      <Chip 
+                        label={status.label} 
+                        sx={{ 
+                          bgcolor: status.color, 
+                          color: 'white', 
+                          fontWeight: 900,
+                          fontSize: '0.7rem',
+                          height: 24,
+                          animation: status.pulse ? 'pulse 1s infinite' : 'none'
+                        }} 
+                      />
+                    </Box>
+                    
+                    <Grid container spacing={2}>
+                      <Grid size={6}>
+                        <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, display: 'block', mb: 0.5 }}>{t('LAUNCH IN')}</Typography>
+                        <Typography variant="h4" sx={{ fontWeight: 900, color: status.label === t('LAUNCH NOW') ? '#d32f2f' : '#222' }}>
+                          {formatTime(status.launch)}
+                        </Typography>
+                      </Grid>
+                      <Grid size={6} sx={{ borderLeft: '1px solid #eee' }}>
+                        <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, display: 'block', mb: 0.5 }}>{t('HIT IN')}</Typography>
+                        <Typography variant="h4" sx={{ fontWeight: 900, color: '#444' }}>
+                          {formatTime(status.hit)}
+                        </Typography>
+                      </Grid>
                     </Grid>
-                    <Grid size={6} sx={{ borderLeft: '1px solid #eee' }}>
-                      <Typography variant="caption" sx={{ color: '#666', fontWeight: 700, display: 'block', mb: 0.5 }}>{t('HIT IN')}</Typography>
-                      <Typography variant="h4" sx={{ fontWeight: 900, color: '#444' }}>
-                        {formatTime(status.hit)}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
-      </Box>
-    </Grid>
-  );
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </Box>
+      </Grid>
+    );
+  };
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -227,6 +258,7 @@ const TimerDisplay: React.FC = () => {
             <MenuItem value="tr">Türkçe</MenuItem>
             <MenuItem value="de">Deutsch</MenuItem>
             <MenuItem value="sv">Svenska</MenuItem>
+            <MenuItem value="es">Español</MenuItem>
           </Select>
         </FormControl>
       </Box>
@@ -287,9 +319,11 @@ const TimerDisplay: React.FC = () => {
       )}
 
       <Grid container spacing={4}>
-        {renderRallySection('mainRallies', 'PHASE 1: MAIN', 0, timeline.maxMain)}
-        {renderRallySection('counterRallies', 'PHASE 2: COUNTER', timeline.counterStart, timeline.maxCounter)}
-        {renderRallySection('counterCounterRallies', 'PHASE 3: C-C', timeline.counterCounterStart, timeline.maxCounterCounter)}
+        {renderRallySection('mainRallies', 'Main Rallies', 0, timeline.maxMain)}
+        {renderRallySection('counterRallies', 'Counter Rallies', timeline.counterStart, timeline.maxCounter)}
+        {renderRallySection('ghostRallies', 'Ghost Rallies', timeline.ghostStart, timeline.maxGhost)}
+        {renderRallySection('counterCounterRallies', 'Counter-Counter Rallies', timeline.counterCounterStart, timeline.maxCounterCounter)}
+        {renderRallySection('secondGhostRallies', 'Second Ghost Rallies', timeline.secondGhostStart, timeline.maxSecondGhost)}
       </Grid>
     </Container>
   );

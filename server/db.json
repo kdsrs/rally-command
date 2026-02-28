@@ -37,5 +37,11 @@
   "timerState": {
     "startTime": null,
     "status": "idle"
+  },
+  "ghostRallies": [],
+  "secondGhostRallies": [],
+  "wikiContent": {
+    "title": "Rally Coordination",
+    "content": "The Rally Command tool helps you synchronize multiple attacks to hit a target simultaneously."
   }
 }
