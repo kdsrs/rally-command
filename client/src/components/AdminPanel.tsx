@@ -170,10 +170,10 @@ const AdminPanel: React.FC = () => {
     setShowFormForType(null);
   };
 
-  const renderRallySection = (type: RallyType, title: string) => (
+  const renderRallySection = (type: RallyType, titleKey: string) => (
     <Grid size={{ xs: 12, md: 4 }} key={type}>
       <Paper elevation={3} sx={{ p: 2, height: '100%' }}>
-        <Typography variant="h6" component="h2" gutterBottom>{t(title)}</Typography>
+        <Typography variant="h6" component="h2" gutterBottom>{t(titleKey)}</Typography>
         <List sx={{ mb: 2 }}>
           {rallyData[type].map(leader => (
             <ListItem
@@ -213,7 +213,7 @@ const AdminPanel: React.FC = () => {
           onClick={() => handleAddLeader(type)}
           fullWidth
         >
-          {t('Add Leader', { type: '' })}
+          {t('Add Leader')}
         </Button>
         {showFormForType === type && (
           <RallyForm

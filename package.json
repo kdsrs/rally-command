@@ -7,7 +7,7 @@
     "server"
   ],
   "scripts": {
-    "build": "npm install && npm install @rollup/rollup-linux-x64-gnu -w client && npm run build -w client",
+    "build": "npm install && (test \"$(uname)\" = \"Linux\" && npm install @rollup/rollup-linux-x64-gnu -w client --no-save || true) && npm run build -w client",
     "start": "node server/index.js"
   }
 }
